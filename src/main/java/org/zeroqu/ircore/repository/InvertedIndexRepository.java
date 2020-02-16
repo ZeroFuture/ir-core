@@ -1,12 +1,13 @@
 package org.zeroqu.ircore.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.zeroqu.ircore.model.Document;
 import org.zeroqu.ircore.model.Posting;
 import org.zeroqu.ircore.model.Record;
 import org.zeroqu.ircore.util.Tokenizer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class InvertedIndexRepository {
     private final Map<String, List<Posting>> invertedIndexes;
@@ -41,20 +42,11 @@ public class InvertedIndexRepository {
         return termFrequencies.toString();
     }
 
-    public String printInvertedIndexRepository() {
-        return "Inverted Indexes: \n" + printInvertedInvertedIndexes() + "\nTerm Frequencies: \n" + printTermFrequencies();
-    }
-
-    public String printInvertedIndexRepositorySnapshot() {
-        StringBuilder sb = new StringBuilder();
-        List<String> tokens = new ArrayList<>(invertedIndexes.keySet());
-        Collections.sort(tokens);
-        for (String token : tokens) {
-            sb.append("Term: ").append(token);
-            sb.append(", Total Frequency: ").append(termFrequencies.get(token));
-            List<String> docIds = invertedIndexes.get(token).stream().map((Posting::getRecordNum)).collect(Collectors.toList());
-            sb.append(", docID List: ").append(docIds.toString()).append("\n\n");
-        }
-        return sb.toString();
+    public String printJSONInvertedIndexRepository() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> storeMap = new HashMap<>();
+        storeMap.put("invertedIndexes", invertedIndexes);
+        storeMap.put("termFrequencies", termFrequencies);
+        return objectMapper.writeValueAsString(storeMap);
     }
 }

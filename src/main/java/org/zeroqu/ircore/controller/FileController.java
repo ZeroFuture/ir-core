@@ -37,7 +37,9 @@ public class FileController {
 
         logger.info(String.format("msg=\"Successfully received uploaded file\" fileName=%s fileSize=%s",
                 fileName, fileSize));
-        File localCopy = new File("./" + fileName);
+
+        String currentPath = System.getProperty("user.dir");
+        File localCopy = new File(currentPath + "/" + fileName);
 
         try {
             file.transferTo(localCopy);
@@ -56,11 +58,12 @@ public class FileController {
         }
 
         try {
-            StopWordsRepository stopWordsRepository = StopWordsRepository.build(new File("./src/main/resources/static/stoplist.txt"));
+            File stopWords = new File("./src/main/resources/static/stoplist.txt");
+            StopWordsRepository stopWordsRepository = StopWordsRepository.build(stopWords);
             RecordRepository recordRepository = RecordRepository.build(document);
             InvertedIndexRepository invertedIndexRepository = InvertedIndexRepository.build(document, stopWordsRepository);
 
-            ResponseEntity<String> response = new ResponseEntity<>(invertedIndexRepository.printInvertedIndexRepositorySnapshot(), HttpStatus.OK);
+            ResponseEntity<String> response = new ResponseEntity<>(invertedIndexRepository.printJSONInvertedIndexRepository(), HttpStatus.OK);
             logger.info(String.format("msg=\"Successfully created response!\" fileName=%s fileSize=%s",
                     fileName, fileSize));
 
@@ -78,6 +81,7 @@ public class FileController {
             Unmarshaller unmarshaller = context.createUnmarshaller();
             document = (Document) unmarshaller.unmarshal(file);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(String.format("msg=\"Failed to parse XML document!\" error=%s", e.getMessage()));
         }
         return document;

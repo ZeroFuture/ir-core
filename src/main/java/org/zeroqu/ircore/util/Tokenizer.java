@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Tokenizer {
-    private static final String CLEAN_TEXT_REGEX = "[0-9.,!?()\\[\\]+:;_<>\"/\n%&#@^*]";
+    private static final String CLEAN_TEXT_REGEX = "[.,!?()\\[\\]+:;_<>\"/\n%&#@^*]";
     private static final String TOKEN_MATCH_REGEX = ".*[a-z]+.*";
 
     public static void tokenize(Record record, InvertedIndexRepository invertedIndexes, StopWordsRepository stopWords) {
