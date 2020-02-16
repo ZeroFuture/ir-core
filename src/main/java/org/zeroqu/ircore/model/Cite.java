@@ -6,11 +6,12 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @Data
 @XmlRootElement(name = "CITE")
 @XmlAccessorType(XmlAccessType.NONE)
-public class Cite {
+public class Cite implements Serializable {
     private String num;
     private String author;
     private String publication;

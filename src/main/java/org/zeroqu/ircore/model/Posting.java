@@ -3,12 +3,13 @@ package org.zeroqu.ircore.model;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @ToString
-public class Posting {
+public class Posting implements Serializable {
     private final String term;
     private final String recordNum;
     private final List<Integer> positions;

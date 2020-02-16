@@ -1,5 +1,6 @@
 package org.zeroqu.ircore.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,11 @@ import org.zeroqu.ircore.repository.StopWordsRepository;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.Map;
 
 @Controller
 @CrossOrigin(origins = "*")
@@ -50,6 +55,7 @@ public class FileController {
                     fileName, fileSize, e.getMessage()));
         }
 
+        long startTime = System.currentTimeMillis();
         Document document = buildDocument(localCopy);
 
         if (document == null) {
@@ -63,12 +69,22 @@ public class FileController {
             RecordRepository recordRepository = RecordRepository.build(document);
             InvertedIndexRepository invertedIndexRepository = InvertedIndexRepository.build(document, stopWordsRepository);
 
-            ResponseEntity<String> response = new ResponseEntity<>(invertedIndexRepository.printJSONInvertedIndexRepository(), HttpStatus.OK);
-            logger.info(String.format("msg=\"Successfully created response!\" fileName=%s fileSize=%s",
-                    fileName, fileSize));
+            long endTime = System.currentTimeMillis();
+            long indexingTime = endTime - startTime;
+
+            Map<String, Object> responseMap = invertedIndexRepository.getStoreMap();
+            double indexingTimeInSec = indexingTime / 1000.0;
+            long memoryUsageInKb = calculateObjectSize(invertedIndexRepository);
+            responseMap.put("indexingTime", indexingTimeInSec);
+            responseMap.put("memoryUsage", memoryUsageInKb);
+
+            ResponseEntity<String> response = new ResponseEntity<>(new ObjectMapper().writeValueAsString(responseMap), HttpStatus.OK);
+            logger.info(String.format("msg=\"Successfully created response!\" fileName=%s fileSize=%s indexingTime=%s memoryUsage=%s",
+                    fileName, fileSize, indexingTimeInSec, memoryUsageInKb));
 
             return response;
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(String.format("msg=\"Failed processing uploaded file\" fileName=%s fileSize=%s error=%s", fileName, fileSize, e.getMessage()));
             return ResponseEntity.badRequest().build();
         }
@@ -85,5 +101,17 @@ public class FileController {
             logger.error(String.format("msg=\"Failed to parse XML document!\" error=%s", e.getMessage()));
         }
         return document;
+    }
+
+    private long calculateObjectSize(Object object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(object);
+
+        oos.close();
+        bos.close();
+        byte[] byteArr = bos.toByteArray();
+
+        return byteArr.length / 1000;
     }
 }

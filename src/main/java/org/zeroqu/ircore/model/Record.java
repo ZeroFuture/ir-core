@@ -3,13 +3,14 @@ package org.zeroqu.ircore.model;
 import lombok.Data;
 
 import javax.xml.bind.annotation.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @XmlRootElement(name = "RECORD")
 @XmlAccessorType(XmlAccessType.NONE)
-public class Record {
+public class Record implements Serializable {
     @XmlElement(name = "PAPERNUM")
     private String paperNum;
 

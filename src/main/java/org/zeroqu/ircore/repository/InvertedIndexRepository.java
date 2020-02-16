@@ -1,15 +1,14 @@
 package org.zeroqu.ircore.repository;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.zeroqu.ircore.model.Document;
 import org.zeroqu.ircore.model.Posting;
 import org.zeroqu.ircore.model.Record;
 import org.zeroqu.ircore.util.Tokenizer;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class InvertedIndexRepository {
+public class InvertedIndexRepository implements Serializable {
     private final Map<String, List<Posting>> invertedIndexes;
     private final Map<String, Long> termFrequencies;
 
@@ -23,6 +22,11 @@ public class InvertedIndexRepository {
         for (Record record : document.getRecords()) {
             Tokenizer.tokenize(record, invertedIndexRepository, stopWordsRepository);
         }
+
+        for (List<Posting> postingList: invertedIndexRepository.invertedIndexes.values()) {
+            postingList.sort(Comparator.comparing(Posting::getRecordNum));
+        }
+
         return invertedIndexRepository;
     }
 
@@ -42,11 +46,10 @@ public class InvertedIndexRepository {
         return termFrequencies.toString();
     }
 
-    public String printJSONInvertedIndexRepository() throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public Map<String, Object> getStoreMap() {
         Map<String, Object> storeMap = new HashMap<>();
         storeMap.put("invertedIndexes", invertedIndexes);
         storeMap.put("termFrequencies", termFrequencies);
-        return objectMapper.writeValueAsString(storeMap);
+        return storeMap;
     }
 }
