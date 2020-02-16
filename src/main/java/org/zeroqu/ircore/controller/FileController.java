@@ -37,7 +37,7 @@ public class FileController {
 
         logger.info(String.format("msg=\"Successfully received uploaded file\" fileName=%s fileSize=%s",
                 fileName, fileSize));
-        File localCopy = new File("/Users/zeroqu/Desktop/Studyspace/CS6200/PJ1/ir-core/" + fileName);
+        File localCopy = new File("./" + fileName);
 
         try {
             file.transferTo(localCopy);
@@ -56,7 +56,7 @@ public class FileController {
         }
 
         try {
-            StopWordsRepository stopWordsRepository = StopWordsRepository.build(new File("/Users/zeroqu/Desktop/Studyspace/CS6200/PJ1/ir-core/src/main/resources/static/stoplist.txt"));
+            StopWordsRepository stopWordsRepository = StopWordsRepository.build(new File("./src/main/resources/static/stoplist.txt"));
             RecordRepository recordRepository = RecordRepository.build(document);
             InvertedIndexRepository invertedIndexRepository = InvertedIndexRepository.build(document, stopWordsRepository);
 
