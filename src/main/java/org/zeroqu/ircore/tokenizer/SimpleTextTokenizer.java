@@ -28,6 +28,7 @@ public class SimpleTextTokenizer implements Tokenizer {
         List<String> result = new ArrayList<>();
         for (String token : tokens) {
             if (token.length() > 0 && token.matches(TOKEN_MATCH_REGEX) && !stopWords.containsStopWord(token)) {
+                token = stemmer.stem(token);
                 int startIdx = 0;
                 while (startIdx < token.length() && !Character.isLetterOrDigit(token.charAt(startIdx))) {
                     startIdx++;
@@ -37,7 +38,7 @@ public class SimpleTextTokenizer implements Tokenizer {
                     endIdx--;
                 }
                 token = token.substring(startIdx, endIdx + 1);
-                if (token.length() > 0) result.add(stemmer.stem(token));
+                if (token.length() > 0) result.add(token);
             }
         }
         return result;
