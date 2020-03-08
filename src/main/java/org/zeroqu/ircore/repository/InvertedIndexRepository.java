@@ -1,55 +1,62 @@
 package org.zeroqu.ircore.repository;
 
+import lombok.Getter;
 import org.zeroqu.ircore.model.Document;
 import org.zeroqu.ircore.model.Posting;
-import org.zeroqu.ircore.model.Record;
-import org.zeroqu.ircore.util.Tokenizer;
+import org.zeroqu.ircore.model.PostingList;
+import org.zeroqu.ircore.tokenizer.Tokenizer;
 
 import java.io.Serializable;
 import java.util.*;
 
+@Getter
 public class InvertedIndexRepository implements Serializable {
-    private final Map<String, List<Posting>> invertedIndexes;
-    private final Map<String, Long> termFrequencies;
+    private final Map<String, PostingList> invertedIndexes;
+    private final Tokenizer tokenizer;
 
-    private InvertedIndexRepository() {
+    private InvertedIndexRepository(Tokenizer tokenizer) {
+        this.tokenizer = tokenizer;
         this.invertedIndexes = new HashMap<>();
-        this.termFrequencies = new HashMap<>();
     }
 
-    public static InvertedIndexRepository build(Document document, StopWordsRepository stopWordsRepository) {
-        InvertedIndexRepository invertedIndexRepository = new InvertedIndexRepository();
-        for (Record record : document.getRecords()) {
-            Tokenizer.tokenize(record, invertedIndexRepository, stopWordsRepository);
-        }
-
-        for (List<Posting> postingList: invertedIndexRepository.invertedIndexes.values()) {
-            postingList.sort(Comparator.comparing(Posting::getRecordNum));
-        }
-
+    public static InvertedIndexRepository build(List<Document> documents, Tokenizer tokenizer) {
+        InvertedIndexRepository invertedIndexRepository = new InvertedIndexRepository(tokenizer);
+        documents.forEach(invertedIndexRepository::addDocument);
         return invertedIndexRepository;
     }
 
-    public void addPosting(Posting posting) {
+    public static InvertedIndexRepository build(Document document, Tokenizer tokenizer) {
+        InvertedIndexRepository invertedIndexRepository = new InvertedIndexRepository(tokenizer);
+        invertedIndexRepository.addDocument(document);
+        return invertedIndexRepository;
+    }
+
+    private void addPosting(Posting posting) {
         String term = posting.getTerm();
-        invertedIndexes.putIfAbsent(term, new ArrayList<>());
-        termFrequencies.putIfAbsent(term, 0L);
-        invertedIndexes.get(term).add(posting);
-        termFrequencies.put(term, termFrequencies.get(term) + posting.getFrequency());
+        invertedIndexes.putIfAbsent(term, new PostingList());
+        invertedIndexes.get(term).addPosting(posting);
     }
 
-    public String printInvertedInvertedIndexes() {
-        return invertedIndexes.toString();
-    }
+    private void addDocument(Document document) {
+        document.getRecords().forEach(record -> {
+            Map<String, Posting> postings = new HashMap<>();
+            String title = record.getTitle();
+            String content = record.getContent();
+            String aggregate = title + content;
+            List<String> tokens = tokenizer.tokenize(aggregate);
 
-    public String printTermFrequencies() {
-        return termFrequencies.toString();
-    }
+            for (int i = 0; i < tokens.size(); i++) {
+                String token = tokens.get(i);
+                postings.putIfAbsent(token, new Posting(token, record.getRecordNum()));
+                postings.get(token).addPosition(i);
+                record.getTokens().add(token);
+            }
 
-    public Map<String, Object> getStoreMap() {
-        Map<String, Object> storeMap = new HashMap<>();
-        storeMap.put("invertedIndexes", invertedIndexes);
-        storeMap.put("termFrequencies", termFrequencies);
-        return storeMap;
+            postings.values().forEach(this::addPosting);
+            record.setPostings(postings);
+        });
+
+        invertedIndexes.values().forEach(postingList ->
+                postingList.getPostings().sort(Comparator.comparing(Posting::getRecordNum)));
     }
 }

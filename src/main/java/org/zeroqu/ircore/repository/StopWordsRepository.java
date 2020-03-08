@@ -1,10 +1,13 @@
 package org.zeroqu.ircore.repository;
 
+import lombok.Getter;
+
 import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StopWordsRepository {
+@Getter
+public class StopWordsRepository implements Serializable {
     private final Set<String> stopWords;
 
     private StopWordsRepository() {
@@ -27,9 +30,5 @@ public class StopWordsRepository {
 
     public boolean containsStopWord(String stopWord) {
         return stopWords.contains(stopWord);
-    }
-
-    public String printStopWordsRepository() {
-        return stopWords.toString();
     }
 }

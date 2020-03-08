@@ -5,7 +5,9 @@ import lombok.Data;
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @XmlRootElement(name = "RECORD")
@@ -52,6 +54,8 @@ public class Record implements Serializable {
     @XmlTransient
     private List<String> tokens;
 
+    @XmlTransient
+    private Map<String, Posting> postings;
 
     public Record() {
         this.authors = new ArrayList<>();
@@ -60,5 +64,6 @@ public class Record implements Serializable {
         this.majorSubjects = new ArrayList<>();
         this.minorSubjects = new ArrayList<>();
         this.tokens = new ArrayList<>();
+        this.postings = new HashMap<>();
     }
 }
