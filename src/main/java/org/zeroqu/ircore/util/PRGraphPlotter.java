@@ -6,6 +6,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zeroqu.ircore.collection.QueryCollection;
 import org.zeroqu.ircore.collection.RecordCollection;
@@ -26,13 +29,16 @@ import java.util.stream.Collectors;
 
 @Component
 public class PRGraphPlotter {
+    private static final Logger logger = LoggerFactory.getLogger(PRGraphPlotter.class.getName());
 
+    @Autowired
     public PRGraphPlotter(RecordCollection recordCollection, TokenizerCollection tokenizerCollection,
                           QueryCollection queryCollection) throws IOException {
         Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker, tokenizerCollection.getTokenizer(),
                 recordCollection.getInvertedIndexRepository(), recordCollection.getRecordRepository());
+        logger.info("msg=\"Start generating PR plot...\"");
 
-        final XYSeries series = new XYSeries("PR curve");
+        XYSeries series = new XYSeries("PR curve");
         QueryRepository queryRepository = queryCollection.getQueryRepository();
 
         List<List<double[]>> allPoints = queryRepository.getQueries().values().stream()
@@ -97,8 +103,11 @@ public class PRGraphPlotter {
                 false
         );
 
+        logger.info(String.format("msg=\"Successfully generated PR plot\""));
+
         String currentPath = System.getProperty("user.dir");
         File file = new File(currentPath + "/pr-graph.png");
         ChartUtilities.saveChartAsPNG(file, chart, 500, 500);
+        logger.info(String.format("msg=\"Successfully saved PR plot...\" filename=%s", file.getName()));
     }
 }

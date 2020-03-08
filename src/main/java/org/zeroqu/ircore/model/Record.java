@@ -40,7 +40,10 @@ public class Record implements Serializable {
     @XmlElement(name = "TOPIC")
     private List<String> minorSubjects;
 
-    @XmlElement(name = "ABSTRACT")
+    @XmlElements({
+            @XmlElement(name = "ABSTRACT"),
+            @XmlElement(name = "EXTRACT")
+    })
     private String content;
 
     @XmlElementWrapper(name = "REFERENCES")
