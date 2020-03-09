@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.zeroqu.ircore.collection.QueryCollection;
 import org.zeroqu.ircore.collection.RecordCollection;
 import org.zeroqu.ircore.collection.TokenizerCollection;
 import org.zeroqu.ircore.model.ResultRecord;
@@ -39,8 +40,10 @@ public class SearchController {
     public ResponseEntity<String> handleSearch(@RequestParam("query") String query) {
         try {
             long startTime = System.currentTimeMillis();
-            Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker, tokenizerCollection.getTokenizer(),
-                    recordCollection.getInvertedIndexRepository(), recordCollection.getRecordRepository());
+            Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker,
+                    tokenizerCollection.getTokenizer(),
+                    recordCollection.getDocumentInvertedIndexRepository(),
+                    recordCollection.getRecordRepository());
             Map<String, Object> responseMap = new HashMap<>();
             List<ResultRecord> resultRecords = ranker.rank(query);
             double searchTime = (System.currentTimeMillis() - startTime) / 1000.0;

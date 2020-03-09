@@ -3,7 +3,7 @@ package org.zeroqu.ircore.ranker;
 import org.zeroqu.ircore.model.Posting;
 import org.zeroqu.ircore.model.Record;
 import org.zeroqu.ircore.model.ResultRecord;
-import org.zeroqu.ircore.repository.InvertedIndexRepository;
+import org.zeroqu.ircore.repository.DocumentInvertedIndexRepository;
 import org.zeroqu.ircore.repository.RecordRepository;
 import org.zeroqu.ircore.tokenizer.Tokenizer;
 
@@ -12,43 +12,45 @@ import java.util.stream.Collectors;
 
 public class TfIdfRanker implements Ranker {
     private final Tokenizer tokenizer;
-    private final InvertedIndexRepository invertedIndexes;
+    private final DocumentInvertedIndexRepository documentInvertedIndexes;
     private final RecordRepository recordRepository;
 
-    private TfIdfRanker(Tokenizer tokenizer, InvertedIndexRepository invertedIndexes,
+    private TfIdfRanker(Tokenizer tokenizer, DocumentInvertedIndexRepository documentInvertedIndexes,
                         RecordRepository recordRepository) {
         this.tokenizer = tokenizer;
-        this.invertedIndexes = invertedIndexes;
+        this.documentInvertedIndexes = documentInvertedIndexes;
         this.recordRepository = recordRepository;
     }
 
-    public static TfIdfRanker build(Tokenizer tokenizer, InvertedIndexRepository invertedIndexes,
+    public static TfIdfRanker build(Tokenizer tokenizer, DocumentInvertedIndexRepository documentInvertedIndexes,
                                     RecordRepository recordRepository) {
-        return new TfIdfRanker(tokenizer, invertedIndexes, recordRepository);
+        return new TfIdfRanker(tokenizer, documentInvertedIndexes, recordRepository);
     }
 
     @Override
     public double score(String query, String recordNum) {
         Record record = recordRepository.getRecords().get(recordNum);
         List<String> queryTokens = tokenizer.tokenize(query);
+
         Map<String, Posting> recordPostings = record.getPostings();
         Set<String> queryTokenSet = new HashSet<>(queryTokens);
-        double N = recordRepository.getRecords().size();
+        double docN = recordRepository.getRecords().size();
 
-        return recordPostings.keySet().stream().map(recordToken -> {
-            if (queryTokenSet.contains(recordToken)) {
-                Posting posting = recordPostings.get(recordToken);
-                double tf = posting.getFrequency();
-                double df = invertedIndexes.getInvertedIndexes().get(recordToken).getDocumentFrequency();
-                return Math.log10(1.0 + tf) * Math.log10(N / df);
-            }
-            else return 0.0;
+        Set<String> intersectTokens = recordPostings.keySet().stream()
+                .map(recordToken -> queryTokenSet.contains(recordToken) ? recordToken : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        return intersectTokens.stream().map(token -> {
+            double docTf = recordPostings.get(token).getFrequency();
+            double docDf = documentInvertedIndexes.getInvertedIndexes().get(token).getDocumentFrequency();
+            return Math.log10(1.0 + docTf) * Math.log10(docN / docDf);
         }).reduce(0.0, Double::sum);
     }
 
     @Override
     public List<ResultRecord> rank(String query) {
-        List<ResultRecord> resultRecords = recordRepository.getRecords().keySet()
+        return recordRepository.getRecords().keySet()
                 .stream()
                 .map(recordNum -> {
                     Record record = recordRepository.getRecords().get(recordNum);
@@ -61,7 +63,5 @@ public class TfIdfRanker implements Ranker {
                     return (int) (diff < 0 ? Math.floor(diff) : Math.ceil(diff));
                 })
                 .collect(Collectors.toList());
-
-        return resultRecords;
     }
 }

@@ -35,7 +35,8 @@ public class P10GraphPlotter {
         logger.info("msg=\"Start generating P@10 histogram plot...\"");
 
         Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker, tokenizerCollection.getTokenizer(),
-                recordCollection.getInvertedIndexRepository(), recordCollection.getRecordRepository());
+                recordCollection.getDocumentInvertedIndexRepository(),
+                recordCollection.getRecordRepository());
 
         HistogramDataset dataset = new HistogramDataset();
         dataset.setType(HistogramType.RELATIVE_FREQUENCY);

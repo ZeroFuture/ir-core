@@ -35,7 +35,8 @@ public class PRGraphPlotter {
     public PRGraphPlotter(RecordCollection recordCollection, TokenizerCollection tokenizerCollection,
                           QueryCollection queryCollection) throws IOException {
         Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker, tokenizerCollection.getTokenizer(),
-                recordCollection.getInvertedIndexRepository(), recordCollection.getRecordRepository());
+                recordCollection.getDocumentInvertedIndexRepository(),
+                recordCollection.getRecordRepository());
         logger.info("msg=\"Start generating PR plot...\"");
 
         XYSeries series = new XYSeries("PR curve");

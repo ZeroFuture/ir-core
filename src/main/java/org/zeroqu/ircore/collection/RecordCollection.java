@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.zeroqu.ircore.model.Document;
-import org.zeroqu.ircore.repository.InvertedIndexRepository;
+import org.zeroqu.ircore.repository.DocumentInvertedIndexRepository;
 import org.zeroqu.ircore.repository.RecordRepository;
 import org.zeroqu.ircore.util.XMLObjectMapper;
 
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Getter
 @Component
 public class RecordCollection {
-    private InvertedIndexRepository invertedIndexRepository;
+    private DocumentInvertedIndexRepository documentInvertedIndexRepository;
     private RecordRepository recordRepository;
 
     private static Logger logger = LoggerFactory.getLogger(RecordCollection.class.getName());
@@ -43,7 +43,7 @@ public class RecordCollection {
             }
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        this.invertedIndexRepository = InvertedIndexRepository.build(documents, tokenizerCollection.getTokenizer());
+        this.documentInvertedIndexRepository = DocumentInvertedIndexRepository.build(documents, tokenizerCollection.getTokenizer());
         this.recordRepository = RecordRepository.build(documents);
     }
 }

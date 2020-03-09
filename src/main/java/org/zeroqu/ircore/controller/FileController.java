@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.zeroqu.ircore.collection.TokenizerCollection;
 import org.zeroqu.ircore.model.Document;
-import org.zeroqu.ircore.repository.InvertedIndexRepository;
+import org.zeroqu.ircore.repository.DocumentInvertedIndexRepository;
 import org.zeroqu.ircore.util.ObjectSizeFetcher;
 import org.zeroqu.ircore.util.XMLObjectMapper;
 import java.io.File;
@@ -75,7 +75,7 @@ public class FileController {
         }
 
         try {
-            InvertedIndexRepository invertedIndexRepository = InvertedIndexRepository.build(document,
+            DocumentInvertedIndexRepository documentInvertedIndexRepository = DocumentInvertedIndexRepository.build(document,
                     tokenizerCollection.getTokenizer());
 
             long endTime = System.currentTimeMillis();
@@ -83,10 +83,10 @@ public class FileController {
 
             Map<String, Object> responseMap = new HashMap<>();
             double indexingTimeInSec = indexingTime / 1000.0;
-            long memoryUsageInKb = ObjectSizeFetcher.calculateObjectSize(invertedIndexRepository);
+            long memoryUsageInKb = ObjectSizeFetcher.calculateObjectSize(documentInvertedIndexRepository);
             responseMap.put("indexingTime", indexingTimeInSec);
             responseMap.put("memoryUsage", memoryUsageInKb);
-            responseMap.put("invertedIndexes", invertedIndexRepository.getInvertedIndexes());
+            responseMap.put("invertedIndexes", documentInvertedIndexRepository.getInvertedIndexes());
 
             ResponseEntity<String> response = new ResponseEntity<>(new ObjectMapper().writeValueAsString(responseMap),
                     HttpStatus.OK);

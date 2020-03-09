@@ -1,15 +1,16 @@
 package org.zeroqu.ircore.ranker;
 
-import org.zeroqu.ircore.repository.InvertedIndexRepository;
+import org.zeroqu.ircore.repository.DocumentInvertedIndexRepository;
 import org.zeroqu.ircore.repository.RecordRepository;
 import org.zeroqu.ircore.tokenizer.Tokenizer;
 
 public class RankerFactory {
     public static Ranker buildRanker(RankerType rankerType, Tokenizer tokenizer,
-                                     InvertedIndexRepository invertedIndexes, RecordRepository recordRepository) {
+                                     DocumentInvertedIndexRepository documentInvertedIndexRepository,
+                                     RecordRepository recordRepository) {
         switch (rankerType) {
             case TfIdfRanker:
-                return TfIdfRanker.build(tokenizer, invertedIndexes, recordRepository);
+                return TfIdfRanker.build(tokenizer, documentInvertedIndexRepository, recordRepository);
             default:
                 throw new IllegalArgumentException("Invalid rankerType!");
         }
