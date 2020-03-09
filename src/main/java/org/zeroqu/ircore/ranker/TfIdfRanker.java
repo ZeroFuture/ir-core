@@ -11,11 +11,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TfIdfRanker implements Ranker {
-    private final Tokenizer tokenizer;
-    private final DocumentInvertedIndexRepository documentInvertedIndexes;
-    private final RecordRepository recordRepository;
+    protected final Tokenizer tokenizer;
+    protected final DocumentInvertedIndexRepository documentInvertedIndexes;
+    protected final RecordRepository recordRepository;
 
-    private TfIdfRanker(Tokenizer tokenizer, DocumentInvertedIndexRepository documentInvertedIndexes,
+    protected TfIdfRanker(Tokenizer tokenizer, DocumentInvertedIndexRepository documentInvertedIndexes,
                         RecordRepository recordRepository) {
         this.tokenizer = tokenizer;
         this.documentInvertedIndexes = documentInvertedIndexes;
@@ -27,19 +27,21 @@ public class TfIdfRanker implements Ranker {
         return new TfIdfRanker(tokenizer, documentInvertedIndexes, recordRepository);
     }
 
+
+    protected Set<String> getIntersectTokens(Set<String> docTokenSet, Set<String> queryTokenSet) {
+        return queryTokenSet.stream()
+                .map(token -> docTokenSet.contains(token) ? token : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
     @Override
     public double score(String query, String recordNum) {
         Record record = recordRepository.getRecords().get(recordNum);
         List<String> queryTokens = tokenizer.tokenize(query);
-
         Map<String, Posting> recordPostings = record.getPostings();
-        Set<String> queryTokenSet = new HashSet<>(queryTokens);
+        Set<String> intersectTokens = getIntersectTokens(recordPostings.keySet(), new HashSet<>(queryTokens));
         double docN = recordRepository.getRecords().size();
-
-        Set<String> intersectTokens = recordPostings.keySet().stream()
-                .map(recordToken -> queryTokenSet.contains(recordToken) ? recordToken : null)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
 
         return intersectTokens.stream().map(token -> {
             double docTf = recordPostings.get(token).getFrequency();

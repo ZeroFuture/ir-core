@@ -34,7 +34,8 @@ public class PRGraphPlotter {
     @Autowired
     public PRGraphPlotter(RecordCollection recordCollection, TokenizerCollection tokenizerCollection,
                           QueryCollection queryCollection) throws IOException {
-        Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker, tokenizerCollection.getTokenizer(),
+        Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker,
+                tokenizerCollection.getTokenizer(),
                 recordCollection.getDocumentInvertedIndexRepository(),
                 recordCollection.getRecordRepository());
         logger.info("msg=\"Start generating PR plot...\"");

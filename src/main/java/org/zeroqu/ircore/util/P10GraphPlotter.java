@@ -34,7 +34,8 @@ public class P10GraphPlotter {
                            QueryCollection queryCollection) throws IOException {
         logger.info("msg=\"Start generating P@10 histogram plot...\"");
 
-        Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker, tokenizerCollection.getTokenizer(),
+        Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker,
+                tokenizerCollection.getTokenizer(),
                 recordCollection.getDocumentInvertedIndexRepository(),
                 recordCollection.getRecordRepository());
 

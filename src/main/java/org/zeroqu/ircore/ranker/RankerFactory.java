@@ -11,6 +11,8 @@ public class RankerFactory {
         switch (rankerType) {
             case TfIdfRanker:
                 return TfIdfRanker.build(tokenizer, documentInvertedIndexRepository, recordRepository);
+            case CosineSimilarityRanker:
+                return CosineSimilarityRanker.build(tokenizer, documentInvertedIndexRepository, recordRepository);
             default:
                 throw new IllegalArgumentException("Invalid rankerType!");
         }
