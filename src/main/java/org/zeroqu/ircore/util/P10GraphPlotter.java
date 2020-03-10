@@ -34,7 +34,7 @@ public class P10GraphPlotter {
                            QueryCollection queryCollection) throws IOException {
         logger.info("msg=\"Start generating P@10 histogram plot...\"");
 
-        Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker,
+        Ranker ranker = RankerFactory.buildRanker(RankerType.BM25Ranker,
                 tokenizerCollection.getTokenizer(),
                 recordCollection.getDocumentInvertedIndexRepository(),
                 recordCollection.getRecordRepository());
@@ -54,12 +54,13 @@ public class P10GraphPlotter {
                             .collect(Collectors.toSet());
                     int numberOfRetrievedAndRelevant = 0;
 
-                    for (int numberOfRetrieved = 1; numberOfRetrieved <= 10; numberOfRetrieved++) {
+                    int nr = Math.min(10, resultRecords.size() - 1);
+                    for (int numberOfRetrieved = 1; numberOfRetrieved <= nr; numberOfRetrieved++) {
                         ResultRecord resultRecord = resultRecords.get(numberOfRetrieved - 1);
                         int recordNum = Integer.parseInt(resultRecord.getRecord().getRecordNum());
                         if (relevantRecords.contains(recordNum)) numberOfRetrievedAndRelevant++;
                     }
-                    return numberOfRetrievedAndRelevant / 10.0;
+                    return numberOfRetrievedAndRelevant * 1.0 / nr;
                 }).toArray(Double[]::new);
 
         double sum = 0.0;

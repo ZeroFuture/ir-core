@@ -12,6 +12,7 @@ import java.util.Map;
 @Getter
 public class RecordRepository implements Serializable {
     private final Map<String, Record> records;
+    private int averageRecordLength;
 
     private RecordRepository() {
         this.records = new HashMap<>();
@@ -20,12 +21,18 @@ public class RecordRepository implements Serializable {
     public static RecordRepository build(Document document) {
         RecordRepository recordRepository = new RecordRepository();
         document.getRecords().forEach(recordRepository::addRecord);
+        recordRepository.averageRecordLength = recordRepository.records.values().stream()
+                .map(record -> record.getTokens().size())
+                .reduce(0, Integer::sum) / recordRepository.records.size();
         return recordRepository;
     }
 
     public static RecordRepository build(List<Document> documents) {
         RecordRepository recordRepository = new RecordRepository();
         documents.forEach(document -> document.getRecords().forEach(recordRepository::addRecord));
+        recordRepository.averageRecordLength = recordRepository.records.values().stream()
+                .map(record -> record.getTokens().size())
+                .reduce(0, Integer::sum) / recordRepository.records.size();
         return recordRepository;
     }
 

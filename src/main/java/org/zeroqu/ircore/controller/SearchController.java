@@ -40,7 +40,7 @@ public class SearchController {
     public ResponseEntity<String> handleSearch(@RequestParam("query") String query) {
         try {
             long startTime = System.currentTimeMillis();
-            Ranker ranker = RankerFactory.buildRanker(RankerType.TfIdfRanker,
+            Ranker ranker = RankerFactory.buildRanker(RankerType.BM25Ranker,
                     tokenizerCollection.getTokenizer(),
                     recordCollection.getDocumentInvertedIndexRepository(),
                     recordCollection.getRecordRepository());
